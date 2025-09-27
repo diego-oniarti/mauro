@@ -5,25 +5,41 @@
 #include <FL/Fl_Widget.H>
 #include <array>
 #include <FL/Fl_Int_Input.H>
+#include <FL/Fl_Output.H>
 
 #include "common.h"
+#include "Optimizer.h"
 
 struct Row {
-    Fl_Text_Display scelta;
-    Fl_Text_Display misura;
+    Fl_Output scelta;
+    Fl_Output misura;
     Fl_Button reject;
 };
 
 class ResultPage {
     private:
-        int asp_low, asp_high, sca_low, sca_high;
-        std::array<int, 8> asp_misure, asp_spessori, sca_misure, sca_spessori;
+        Data data;
+        Optimizer* op;
         Fl_Window* win;
 
-        Fl_Button *undo_button, *save_button;
+        Fl_Button *undo_button, *redo_button;
+        Fl_Button *save_button, *quit_button;
         std::array<Row*, 8> scarico_rows;
-        // std::array<Row, 8> aspirazione_rows;
+        std::array<Row*, 8> aspirazione_rows;
+
+        static void undo_callback(Fl_Widget *w, void *v);
+        static void redo_callback(Fl_Widget *w, void *v);
+
+        void display();
     public:
-        ResultPage(Data d);
-        ~ResultPage();
+        ResultPage();
+
+        void quit();
+        void undo();
+        void redo();
+        void save();
+        void exclude(int);
+
+        void show();
+        void set_data(Data);
 };

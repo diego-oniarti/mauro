@@ -13,11 +13,15 @@ class InitialPage {
         std::array<Fl_Int_Input*, 8> asp_misure, asp_spessori, sca_misure, sca_spessori;
         Fl_Button *confirm_button;
 
-        ResultPage *result_page;
+        Fl_Button *save_button, *load_button;
+
+        ResultPage result_page;
 
         static void confirm_callback(Fl_Widget*, void*);
     public:
         InitialPage();
         ~InitialPage();
         void conferma();
+        Data getData();
+        void carica();
 };

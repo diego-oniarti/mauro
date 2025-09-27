@@ -1,4 +1,5 @@
 #include <array>
+#include <iostream>
 #ifndef COMMONS
 #define COMMONS
 
