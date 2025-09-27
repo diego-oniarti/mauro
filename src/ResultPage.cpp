@@ -171,6 +171,7 @@ void ResultPage::display() {
             ra->scelta.value("Compra");
             ra->misura.value(data.asp_misure[i]+data.asp_spessori[i]-asp_mid);
             ra->reject.deactivate();
+            ra->misura.color(9);
         }else{
             ra->scelta.value(disp[i]+1);
             int m = data.asp_misure[i]+data.asp_spessori[i]-spessori[disp[i]];
@@ -181,6 +182,7 @@ void ResultPage::display() {
             }else{
                 ra->misura.color(7);
             }
+            ra->reject.activate();
         }
 
         Row* rs = scarico_rows[i];
@@ -188,6 +190,7 @@ void ResultPage::display() {
             rs->scelta.value("Compra");
             rs->misura.value(data.sca_misure[i]+data.sca_spessori[i]-sca_mid);
             rs->reject.deactivate();
+            rs->misura.color(9);
         }else{
             rs->scelta.value(disp[i+8]+1);
             int m = data.sca_misure[i]+data.sca_spessori[i]-spessori[disp[i+8]];
@@ -198,6 +201,7 @@ void ResultPage::display() {
             }else{
                 rs->misura.color(7);
             }
+            rs->reject.activate();
         }
     }
 

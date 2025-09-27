@@ -1,2 +1,5 @@
 makefile
 .clangd
+dist/installer.wixobj
+dist/cab1.cab
+dist/MauroSpessori.wixpdb

@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+    <Product Id="*" Name="MauroSpessori" Language="1033" Version="1.0.0.0" Manufacturer="Diego Oniarti" UpgradeCode="e6a31747-d0c2-4f78-9cc5-6fe67b80eff4">
+        <Package InstallerVersion="500" Compressed="yes" InstallScope="perMachine" />
+
+        <MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
+        <MediaTemplate />
+
+        <Feature Id="MainFeature" Title="MauroSpessori" Level="1">
+            <ComponentGroupRef Id="AppFiles" />
+        </Feature>
+    </Product>
+
+    <!-- Icon declaration -->
+    <Fragment>
+        <Icon Id="MauroIcon.ico" SourceFile="MauroIcon.ico" />
+    </Fragment>
+
+    <!-- Directory structure -->
+    <Fragment>
+        <Directory Id="TARGETDIR" Name="SourceDir">
+            <Directory Id="ProgramFilesFolder">
+                <Directory Id="INSTALLFOLDER" Name="MauroSpessori" />
+            </Directory>
+            <Directory Id="DesktopFolder" Name="Desktop" />
+            <Directory Id="ProgramMenuFolder">
+                <Directory Id="MauroSpessoriStartMenuDir" Name="MauroSpessori" />
+            </Directory>
+        </Directory>
+    </Fragment>
+
+    <!-- Application files -->
+    <Fragment>
+        <ComponentGroup Id="AppFiles" Directory="INSTALLFOLDER">
+            <!-- main.exe with shortcuts -->
+            <Component Id="MainEXE" Guid="93a849ec-9816-4357-b330-bb5bb48a36e6">
+                <File Source="..\bin\main.exe" KeyPath="yes">
+                    <Shortcut Id="DesktopShortcut"
+                        Name="MauroSpessori"
+                        Directory="DesktopFolder"
+                        WorkingDirectory="INSTALLFOLDER"
+                        Icon="MauroIcon.ico"
+                        IconIndex="0"
+                        Advertise="no" />
+                    <Shortcut Id="StartMenuShortcut"
+                        Name="MauroSpessori"
+                        Directory="MauroSpessoriStartMenuDir"
+                        WorkingDirectory="INSTALLFOLDER"
+                        Icon="MauroIcon.ico"
+                        IconIndex="0"
+                        Advertise="no" />
+                </File>
+            </Component>
+
+            <!-- libfltk.dll -->
+            <Component Id="FLTKDLL" Guid="95e9aa12-1f53-49ba-bca9-083e39d76fb9">
+                <File Source="..\bin\libfltk.dll" KeyPath="yes" />
+            </Component>
+        </ComponentGroup>
+    </Fragment>
+
+    <!-- Clean up Start Menu folder on uninstall -->
+    <Fragment>
+        <DirectoryRef Id="MauroSpessoriStartMenuDir">
+            <Component Id="StartMenuCleanup" Guid="f1b4c826-b8ab-4d3c-9f68-1e5c9c4a2c3f">
+                <RemoveFolder Id="RemoveStartMenuFolder" On="uninstall"/>
+                <RegistryValue Root="HKCU" Key="Software\MauroSpessori" Name="startmenufolder" Type="integer" Value="1" KeyPath="yes"/>
+            </Component>
+        </DirectoryRef>
+    </Fragment>
+</Wix>
