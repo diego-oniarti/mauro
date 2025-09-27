@@ -101,33 +101,33 @@ void InitialPage::carica() {
         FILE *fp = fopen(chooser.filename(), "r");
         if (fp) {
             int v;
-            fscanf_s(fp, "%d", &v);
-            asp_low->value(v);
-            fscanf_s(fp, "%d", &v);
-            asp_high->value(v);
-            fscanf_s(fp, "%d", &v);
-            sca_low->value(v);
-            fscanf_s(fp, "%d", &v);
-            sca_high->value(v);
+            fscanf(fp, "%d", &v);
+            asp_low->value(std::to_string(v).c_str());
+            fscanf(fp, "%d", &v);
+            asp_high->value(std::to_string(v).c_str());
+            fscanf(fp, "%d", &v);
+            sca_low->value(std::to_string(v).c_str());
+            fscanf(fp, "%d", &v);
+            sca_high->value(std::to_string(v).c_str());
 
             for (int i=0; i<8; i++) {
-                fscanf_s(fp, "%d", &v);
-                asp_spessori[i]->value(v);
+                fscanf(fp, "%d", &v);
+                asp_spessori[i]->value(std::to_string(v).c_str());
             }
 
             for (int i=0; i<8; i++) {
-                fscanf_s(fp, "%d", &v);
-                asp_misure[i]->value(v);
+                fscanf(fp, "%d", &v);
+                asp_misure[i]->value(std::to_string(v).c_str());
             }
 
             for (int i=0; i<8; i++) {
-                fscanf_s(fp, "%d", &v);
-                sca_spessori[i]->value(v);
+                fscanf(fp, "%d", &v);
+                sca_spessori[i]->value(std::to_string(v).c_str());
             }
 
             for (int i=0; i<8; i++) {
-                fscanf_s(fp, "%d", &v);
-                sca_misure[i]->value(v);
+                fscanf(fp, "%d", &v);
+                sca_misure[i]->value(std::to_string(v).c_str());
             }
 
             fclose(fp);
@@ -156,8 +156,8 @@ void InitialPage::conferma() {
 InitialPage::InitialPage() {
     win = new Fl_Window(310, 360, "Mauro");
 
-    Fl_Pixmap *pix = new Fl_Pixmap(m2);
-    Fl_RGB_Image *rgb = new Fl_RGB_Image(pix, 0);
+    pix = new Fl_Pixmap(m2);
+    rgb = new Fl_RGB_Image(pix, 0);
     win->icon(rgb);
 
     Fl_Pack *inputs = new Fl_Pack(20,5,0,350);
@@ -255,4 +255,6 @@ InitialPage::InitialPage() {
 
 InitialPage::~InitialPage() {
     delete win;
+    delete pix;
+    delete rgb;
 }

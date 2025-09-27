@@ -1,5 +1,6 @@
 #include "FL/Fl_Button.H"
 #include "FL/Fl_Window.H"
+#include <FL/Fl_Image.H>
 #include <FL/Fl_Widget.H>
 #include <array>
 #include <FL/Fl_Int_Input.H>
@@ -16,6 +17,8 @@ class InitialPage {
         Fl_Button *save_button, *load_button;
 
         ResultPage result_page;
+        Fl_Pixmap *pix;
+        Fl_RGB_Image *rgb;
 
         static void confirm_callback(Fl_Widget*, void*);
     public:

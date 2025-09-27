@@ -169,13 +169,13 @@ void ResultPage::display() {
         Row* ra = aspirazione_rows[i];
         if (disp[i]==-1) {
             ra->scelta.value("Compra");
-            ra->misura.value(data.asp_misure[i]+data.asp_spessori[i]-asp_mid);
+            ra->misura.value(std::to_string(data.asp_misure[i]+data.asp_spessori[i]-asp_mid).c_str());
             ra->reject.deactivate();
             ra->misura.color(9);
         }else{
-            ra->scelta.value(disp[i]+1);
+            ra->scelta.value(std::to_string(disp[i]+1).c_str());
             int m = data.asp_misure[i]+data.asp_spessori[i]-spessori[disp[i]];
-            ra->misura.value(m);
+            ra->misura.value(std::to_string(m).c_str());
 
             if (m==data.asp_low || m==data.asp_high) {
                 ra->misura.color(92);
@@ -188,13 +188,13 @@ void ResultPage::display() {
         Row* rs = scarico_rows[i];
         if (disp[i+8]==-1) {
             rs->scelta.value("Compra");
-            rs->misura.value(data.sca_misure[i]+data.sca_spessori[i]-sca_mid);
+            rs->misura.value(std::to_string(data.sca_misure[i]+data.sca_spessori[i]-sca_mid).c_str());
             rs->reject.deactivate();
             rs->misura.color(9);
         }else{
-            rs->scelta.value(disp[i+8]+1);
+            rs->scelta.value(std::to_string(disp[i+8]+1).c_str());
             int m = data.sca_misure[i]+data.sca_spessori[i]-spessori[disp[i+8]];
-            rs->misura.value(m);
+            rs->misura.value(std::to_string(m).c_str());
 
             if (m==data.sca_low || m==data.sca_high) {
                 rs->misura.color(92);
