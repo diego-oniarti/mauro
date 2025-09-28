@@ -16,6 +16,7 @@ private:
     std::vector<Step> history;
     std::array<std::set<int>, 16> exclusions;
     int pos;
+    bool is_4_cil;
 public:
     Optimizer(Data d);
     dispo exclude(int);

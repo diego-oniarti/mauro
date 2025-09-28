@@ -2,6 +2,7 @@
 #include <algorithm>
 #include <array>
 #include <cstdio>
+#include <stdio.h>
 #include <string>
 #include "FL/Enumerations.H"
 #include "FL/Fl_Box.H"
@@ -34,45 +35,37 @@ void salva(Fl_Widget* w, void* v) {
     InitialPage *p = (InitialPage*)v;
     Data d = p->getData();
 
-    Fl_Native_File_Chooser chooser;
-    chooser.type(Fl_Native_File_Chooser::BROWSE_SAVE_FILE);
-    chooser.filter("Text\t*.txt\nAll Files\t*");
-    chooser.preset_file("Dati.txt");
+    std::string filename = pick_filename("Dati.txt");
+    if (filename.length()==0) return;
 
-    if (chooser.show()==0) {
-        std::string filename = chooser.filename();
-        if (filename.find('.') == std::string::npos) {
-            filename += ".txt";
+    FILE *fp;
+    fopen_s(&fp, filename.c_str(), "w");
+    if (fp) {
+        fprintf(fp, "%d %d %d %d\n", d.asp_low, d.asp_high, d.sca_low, d.sca_high);
+
+        for (int v: d.asp_spessori) {
+            fprintf(fp, "%d ", v);
         }
+        fprintf(fp, "\n");
 
-        FILE *fp = fopen(filename.c_str(), "w");
-        if (fp) {
-            fprintf(fp, "%d %d %d %d\n", d.asp_low, d.asp_high, d.sca_low, d.sca_high);
-
-            for (int v: d.asp_spessori) {
-                fprintf(fp, "%d ", v);
-            }
-            fprintf(fp, "\n");
-
-            for (int v: d.asp_misure) {
-                fprintf(fp, "%d ", v);
-            }
-            fprintf(fp, "\n");
-
-            for (int v: d.sca_spessori) {
-                fprintf(fp, "%d ", v);
-            }
-            fprintf(fp, "\n");
-
-            for (int v: d.sca_misure) {
-                fprintf(fp, "%d ", v);
-            }
-            fprintf(fp, "\n");
-
-            fclose(fp);
-        } else {
-            fl_alert("File non salvato");
+        for (int v: d.asp_misure) {
+            fprintf(fp, "%d ", v);
         }
+        fprintf(fp, "\n");
+
+        for (int v: d.sca_spessori) {
+            fprintf(fp, "%d ", v);
+        }
+        fprintf(fp, "\n");
+
+        for (int v: d.sca_misure) {
+            fprintf(fp, "%d ", v);
+        }
+        fprintf(fp, "\n");
+
+        fclose(fp);
+    } else {
+        fl_alert("File non salvato");
     }
 }
 
@@ -98,35 +91,36 @@ void InitialPage::carica() {
     Fl_Native_File_Chooser chooser;
     chooser.type(Fl_Native_File_Chooser::BROWSE_FILE);
     if (chooser.show()==0) {
-        FILE *fp = fopen(chooser.filename(), "r");
+        FILE *fp;
+        fopen_s(&fp, chooser.filename(), "r");
         if (fp) {
             int v;
-            fscanf(fp, "%d", &v);
+            fscanf_s(fp, "%d", &v);
             asp_low->value(std::to_string(v).c_str());
-            fscanf(fp, "%d", &v);
+            fscanf_s(fp, "%d", &v);
             asp_high->value(std::to_string(v).c_str());
-            fscanf(fp, "%d", &v);
+            fscanf_s(fp, "%d", &v);
             sca_low->value(std::to_string(v).c_str());
-            fscanf(fp, "%d", &v);
+            fscanf_s(fp, "%d", &v);
             sca_high->value(std::to_string(v).c_str());
 
             for (int i=0; i<8; i++) {
-                fscanf(fp, "%d", &v);
+                fscanf_s(fp, "%d", &v);
                 asp_spessori[i]->value(std::to_string(v).c_str());
             }
 
             for (int i=0; i<8; i++) {
-                fscanf(fp, "%d", &v);
+                fscanf_s(fp, "%d", &v);
                 asp_misure[i]->value(std::to_string(v).c_str());
             }
 
             for (int i=0; i<8; i++) {
-                fscanf(fp, "%d", &v);
+                fscanf_s(fp, "%d", &v);
                 sca_spessori[i]->value(std::to_string(v).c_str());
             }
 
             for (int i=0; i<8; i++) {
-                fscanf(fp, "%d", &v);
+                fscanf_s(fp, "%d", &v);
                 sca_misure[i]->value(std::to_string(v).c_str());
             }
 
@@ -154,13 +148,13 @@ void InitialPage::conferma() {
 }
 
 InitialPage::InitialPage() {
-    win = new Fl_Window(310, 360, "Mauro");
+    win = new Fl_Window(320, 360, "Calcolo gioco valvole");
 
     pix = new Fl_Pixmap(m2);
     rgb = new Fl_RGB_Image(pix, 0);
     win->icon(rgb);
 
-    Fl_Pack *inputs = new Fl_Pack(20,5,0,350);
+    Fl_Pack *inputs = new Fl_Pack(30,5,0,350);
     inputs->type(Fl_Pack::HORIZONTAL);
     inputs->spacing(30);
     // Aspirazione
@@ -182,7 +176,7 @@ InitialPage::InitialPage() {
     asp_spe->spacing(2);
     for (int i=0; i<8; i++) {
         asp_spessori[i] = new Fl_Int_Input(00,0,asp_spe->w(),25);
-        asp_spessori[i]->copy_label(std::to_string(i+1).c_str());
+        asp_spessori[i]->copy_label((std::to_string(i+1)+"A").c_str());
     }
     asp_spe->end();
     asp_spe_titled->end();
@@ -218,7 +212,7 @@ InitialPage::InitialPage() {
     sca_spe->spacing(2);
     for (int i=0; i<8; i++) {
         sca_spessori[i] = new Fl_Int_Input(0,0,sca_spe->w(),25);
-        sca_spessori[i]->copy_label(std::to_string(i+9).c_str());
+        sca_spessori[i]->copy_label((std::to_string(i+1)+"S").c_str());
     }
     sca_spe->end();
     sca_spe_titled->end();
@@ -237,14 +231,14 @@ InitialPage::InitialPage() {
 
     inputs->end();
 
-    confirm_button = new Fl_Button(200,320,90,30, "Conferma @UpArrow");
+    confirm_button = new Fl_Button(210,320,90,30, "Calcola @UpArrow");
     confirm_button->callback(confirm_callback, this);
 
-    save_button = new Fl_Button(10,320,80,30, "@filesave  Salva");
+    save_button = new Fl_Button(20,320,80,30, "@filesave  Salva");
     Data d = getData();
     save_button->callback(salva, this);
 
-    load_button = new Fl_Button(90,320,80,30, "@fileopen  Carica");
+    load_button = new Fl_Button(100,320,80,30, "@fileopen  Carica");
     load_button->callback([](Fl_Widget* w, void* v){((InitialPage*)v)->carica();}, this);
 
     // win->resizable(win);

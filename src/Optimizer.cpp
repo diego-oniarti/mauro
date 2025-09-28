@@ -1,14 +1,16 @@
 #include "Optimizer.h"
 #include <array>
 #include <functional>
-#include <iostream>
 #include <set>
+
+#include "common.h"
 
 Optimizer::Optimizer(Data d) {
     data = d;
     dispo first = solve();
     history.push_back(Step { -1, -1, first });
     pos = 0;
+    is_4_cil = is_4_cilindri(d);
 }
 
 dispo Optimizer::exclude(int valv) {
@@ -117,6 +119,13 @@ dispo Optimizer::solve() {
                     && data.sca_low <= t && t <= data.sca_high) {
                 compatibility[I].insert(j);
             }
+        }
+    }
+
+    if (is_4_cil) {
+        for (int i=4; i<8; i++) {
+            compatibility[i  ].clear();
+            compatibility[i+8].clear();
         }
     }
 

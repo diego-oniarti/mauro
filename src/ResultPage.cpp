@@ -1,12 +1,13 @@
 #include "ResultPage.h"
 #include "FL/Fl_Button.H"
-#include "FL/Fl_Native_File_Chooser.H"
 #include <FL/Enumerations.H>
 #include <FL/Fl_Box.H>
 #include <FL/Fl_Pack.H>
 #include <FL/fl_ask.H>
 #include <FL/Fl_File_Chooser.H>
+#include <algorithm>
 #include <array>
+#include <cstdio>
 #include <string>
 
 struct Params {
@@ -15,10 +16,10 @@ struct Params {
 };
 
 ResultPage::ResultPage() {
-    win = new Fl_Window(389, 329, "Soluzione");
+    win = new Fl_Window(399, 329, "Disposizione");
     op = NULL;
 
-    Fl_Pack *aspirazione_output = new Fl_Pack(20,40,159,0);
+    Fl_Pack *aspirazione_output = new Fl_Pack(30,40,159,0);
     Fl_Box *aspirazione_label = new Fl_Box(0,0,aspirazione_output->w(),25,"Aspirazione");
     aspirazione_label->align(FL_ALIGN_CENTER);
     Fl_Pack *asp_column = new Fl_Pack(0,0,aspirazione_output->w(),0);
@@ -33,7 +34,7 @@ ResultPage::ResultPage() {
                 Fl_Button(0, 0, 25, 25, "@refresh"),
         };
         aspirazione_rows[i]->scelta.align(FL_ALIGN_LEFT);
-        aspirazione_rows[i]->scelta.copy_label(std::to_string(i+1).c_str());
+        aspirazione_rows[i]->scelta.copy_label((std::to_string(i+1)+"A").c_str());
         aspirazione_rows[i]->reject.callback([](Fl_Widget* w, void* v){
                 int valvola = ((Params*)v)->valvola;
                 ResultPage* page = ((Params*)v)->p;
@@ -45,7 +46,7 @@ ResultPage::ResultPage() {
     asp_column->end();
     aspirazione_output->end();
 
-    Fl_Pack *scarico_output = new Fl_Pack(210,40,159,0);
+    Fl_Pack *scarico_output = new Fl_Pack(220,40,159,0);
     Fl_Box *scarico_label = new Fl_Box(0,0,scarico_output->w(),25,"Scarico");
     scarico_label->align(FL_ALIGN_CENTER);
     Fl_Pack *sca_column = new Fl_Pack(0,0,scarico_output->w(),0);
@@ -60,7 +61,7 @@ ResultPage::ResultPage() {
                 Fl_Button(0, 0, 25, 25, "@refresh"),
         };
         scarico_rows[i]->scelta.align(FL_ALIGN_LEFT);
-        scarico_rows[i]->scelta.copy_label(std::to_string(i+9).c_str());
+        scarico_rows[i]->scelta.copy_label((std::to_string(i+1)+"S").c_str());
         scarico_rows[i]->reject.callback([](Fl_Widget* w, void* v){
                 int valvola = ((Params*)v)->valvola;
                 ResultPage* page = ((Params*)v)->p;
@@ -78,10 +79,10 @@ ResultPage::ResultPage() {
     redo_button = new Fl_Button(100,10,80,25,"@redo   Ripeti");
     redo_button->callback([](Fl_Widget *w, void *v){ ((ResultPage*)v)->redo(); }, this);
 
-    save_button = new Fl_Button(289,289,80,30,"@filesave   Salva");
+    save_button = new Fl_Button(299,289,80,30,"@filesave   Salva");
     save_button->callback([](Fl_Widget *w, void *v){ ((ResultPage*)v)->save(); }, this);
 
-    quit_button = new Fl_Button(199,289,80,30,"@returnarrow   Esci");
+    quit_button = new Fl_Button(209,289,80,30,"@returnarrow   Esci");
     quit_button->callback([](Fl_Widget *w, void *v){ ((ResultPage*)v)->quit(); }, this);
 
     win->end();
@@ -98,33 +99,37 @@ void ResultPage::redo() {
 }
 
 void ResultPage::save() {
-    Fl_Native_File_Chooser chooser;
-    chooser.type(Fl_Native_File_Chooser::BROWSE_SAVE_FILE);
-    chooser.filter("Text\t*.txt\nAll Files\t*");
-    chooser.preset_file("Spessori.txt");
+    std::string filename = pick_filename("Spessori.txt");
 
-    if (chooser.show()==0) {
-        std::string filename = chooser.filename();
-        if (filename.find('.') == std::string::npos) {
-            filename += ".txt";
+    if (filename.length()==0) return;
+
+    int asp_mid = (data.asp_low+data.asp_high)/2;
+    int sca_mid = (data.sca_low+data.sca_high)/2;
+
+    std::array<int, 16> all_spessori;
+    std::copy(data.asp_spessori.begin(), data.asp_spessori.end(), all_spessori.begin());
+    std::copy(data.sca_spessori.begin(), data.sca_spessori.end(), all_spessori.begin()+8);
+
+    FILE *fp;
+    fopen_s(&fp, filename.c_str(), "w");
+    int limit = is_4_cilindri(data) ? 4 : 8;
+    if (fp) {
+        dispo dis = op->get_disp();
+        for (int i=0; i<limit; i++) {
+            std::string indice = num_to_label(i);
+            std::string scelta = (dis[i]==-1)?"Rimpiazzare":num_to_label(dis[i]);
+            int third = (dis[i]!=-1) ? all_spessori[dis[i]] : data.asp_misure[i]+data.asp_spessori[i]-asp_mid ;
+            fprintf(fp, "%s: %s (%d)\n", indice.c_str(), scelta.c_str(), third);
+        }
+        fprintf(fp, "\n");
+        for (int i=8; i<8+limit; i++) {
+            std::string indice = num_to_label(i);
+            std::string scelta = (dis[i]==-1)?"Rimpiazzare":num_to_label(dis[i]);
+            int third = (dis[i]!=-1) ? all_spessori[dis[i]] : data.asp_misure[i-8]+data.asp_spessori[i-8]-asp_mid ;
+            fprintf(fp, "%s: %s (%d)\n", indice.c_str(), scelta.c_str(), third);
         }
 
-        FILE *fp = fopen(filename.c_str(), "w");
-        if (fp) {
-            dispo dis = op->get_disp();
-            for (int i=0; i<8; i++) {
-                fprintf(fp, "%d: %d (%d)\n", i+1, dis[i], data.asp_spessori[i]);
-            }
-            for (int i=0; i<8; i++) {
-                fprintf(fp, "%d: %d (%d)\n", i+9, dis[i+8], data.sca_spessori[i]);
-            }
-
-            fclose(fp);
-        } else {
-            fl_alert("Could not save file!");
-        }
-    }else{
-        fl_alert("File non salvato");
+        fclose(fp);
     }
 }
 
@@ -148,6 +153,27 @@ void ResultPage::set_data(Data d) {
     if (op!=NULL) delete op;
     data = d;
     op = new Optimizer(d);
+
+    if (is_4_cilindri(data)) {
+        for (int i=4; i<8; i++) {
+            aspirazione_rows[i]->misura.hide();
+            aspirazione_rows[i]->scelta.hide();
+            aspirazione_rows[i]->reject.hide();
+            scarico_rows[i]->misura.hide();
+            scarico_rows[i]->scelta.hide();
+            scarico_rows[i]->reject.hide();
+        }
+    }else{
+        for (int i=4; i<8; i++) {
+            aspirazione_rows[i]->misura.show();
+            aspirazione_rows[i]->scelta.show();
+            aspirazione_rows[i]->reject.show();
+            scarico_rows[i]->misura.show();
+            scarico_rows[i]->scelta.show();
+            scarico_rows[i]->reject.show();
+        }
+    }
+
     display();
 }
 
@@ -168,41 +194,53 @@ void ResultPage::display() {
     for (int i=0; i<8; i++) {
         Row* ra = aspirazione_rows[i];
         if (disp[i]==-1) {
-            ra->scelta.value("Compra");
+            ra->scelta.value("Sostituire");
             ra->misura.value(std::to_string(data.asp_misure[i]+data.asp_spessori[i]-asp_mid).c_str());
             ra->reject.deactivate();
+            // Sostituire
             ra->misura.color(9);
+            ra->misura.textcolor(0);
         }else{
-            ra->scelta.value(std::to_string(disp[i]+1).c_str());
+            ra->scelta.value(num_to_label(disp[i]).c_str());
             int m = data.asp_misure[i]+data.asp_spessori[i]-spessori[disp[i]];
             ra->misura.value(std::to_string(m).c_str());
 
             if (m==data.asp_low || m==data.asp_high) {
-                ra->misura.color(92);
+                // Limite
+                ra->misura.color(0);
+                ra->misura.textcolor(7);
             }else{
+                // Normale
                 ra->misura.color(7);
+                ra->misura.textcolor(0);
             }
             ra->reject.activate();
         }
 
         Row* rs = scarico_rows[i];
         if (disp[i+8]==-1) {
-            rs->scelta.value("Compra");
+            rs->scelta.value("Sostituire");
             rs->misura.value(std::to_string(data.sca_misure[i]+data.sca_spessori[i]-sca_mid).c_str());
             rs->reject.deactivate();
             rs->misura.color(9);
+            rs->misura.textcolor(0);
         }else{
-            rs->scelta.value(std::to_string(disp[i+8]+1).c_str());
+            rs->scelta.value(num_to_label(disp[i+8]).c_str());
             int m = data.sca_misure[i]+data.sca_spessori[i]-spessori[disp[i+8]];
             rs->misura.value(std::to_string(m).c_str());
 
             if (m==data.sca_low || m==data.sca_high) {
-                rs->misura.color(92);
+                rs->misura.color(0);
+                rs->misura.textcolor(7);
             }else{
                 rs->misura.color(7);
+                rs->misura.textcolor(0);
             }
             rs->reject.activate();
         }
+
+        ra->misura.damage(Fl_Damage::FL_DAMAGE_ALL);
+        rs->misura.damage(Fl_Damage::FL_DAMAGE_ALL);
     }
 
     if (op->can_undo()) {

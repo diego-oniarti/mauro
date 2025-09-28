@@ -4,10 +4,12 @@
         <Package InstallerVersion="500" Compressed="yes" InstallScope="perMachine" />
 
         <MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
-        <MediaTemplate />
+        <Media Id="1" Cabinet="media1.cab" EmbedCab="yes" />
 
         <Feature Id="MainFeature" Title="MauroSpessori" Level="1">
             <ComponentGroupRef Id="AppFiles" />
+            <ComponentRef Id="DesktopShortcut" />
+            <ComponentRef Id="StartMenuShortcut" />
         </Feature>
     </Product>
 
@@ -32,39 +34,57 @@
     <!-- Application files -->
     <Fragment>
         <ComponentGroup Id="AppFiles" Directory="INSTALLFOLDER">
-            <!-- main.exe with shortcuts -->
+            <!-- main.exe -->
             <Component Id="MainEXE" Guid="93a849ec-9816-4357-b330-bb5bb48a36e6">
-                <File Source="..\bin\main.exe" KeyPath="yes">
-                    <Shortcut Id="DesktopShortcut"
-                        Name="MauroSpessori"
-                        Directory="DesktopFolder"
-                        WorkingDirectory="INSTALLFOLDER"
-                        Icon="MauroIcon.ico"
-                        IconIndex="0"
-                        Advertise="no" />
-                    <Shortcut Id="StartMenuShortcut"
-                        Name="MauroSpessori"
-                        Directory="MauroSpessoriStartMenuDir"
-                        WorkingDirectory="INSTALLFOLDER"
-                        Icon="MauroIcon.ico"
-                        IconIndex="0"
-                        Advertise="no" />
-                </File>
+                <File Source="..\bin\main.exe" KeyPath="yes" />
             </Component>
 
             <!-- libfltk.dll -->
             <Component Id="FLTKDLL" Guid="95e9aa12-1f53-49ba-bca9-083e39d76fb9">
                 <File Source="..\bin\libfltk.dll" KeyPath="yes" />
             </Component>
+
+            <!-- libwinpthread-1.dll -->
+            <Component Id="LibPTHREAD" Guid="e546c76d-ad9f-468d-b18a-f996f9bab468">
+                <File Source="..\bin\libwinpthread-1.dll" KeyPath="yes" />
+            </Component>
+
+            <Component Id="LibGCC" Guid="7d012321-6126-49cc-b0e8-6a285fb578bf">
+                <File Source="..\bin\libgcc_s_seh-1.dll" KeyPath="yes" />
+            </Component>
+
+            <!-- libstdc++-6.dll -->
+            <Component Id="LibSTDCPP" Guid="7c4fdf2a-aef9-446e-8012-7a9b67b1564c">
+                <File Source="..\bin\libstdc++-6.dll" KeyPath="yes" />
+            </Component>
+
         </ComponentGroup>
     </Fragment>
 
-    <!-- Clean up Start Menu folder on uninstall -->
+    <!-- Shortcuts (split into their own components) -->
     <Fragment>
+        <DirectoryRef Id="DesktopFolder">
+            <Component Id="DesktopShortcut" Guid="93b114f2-8db7-4be2-afba-43d8fef0a161">
+                <Shortcut Id="MauroSpessoriDesktop"
+                    Name="MauroSpessori"
+                    Target="[INSTALLFOLDER]main.exe"
+                    WorkingDirectory="INSTALLFOLDER"
+                    Icon="MauroIcon.ico"
+                    IconIndex="0" />
+                <RegistryValue Root="HKCU" Key="Software\MauroSpessori" Name="desktop" Type="integer" Value="1" KeyPath="yes"/>
+            </Component>
+        </DirectoryRef>
+
         <DirectoryRef Id="MauroSpessoriStartMenuDir">
-            <Component Id="StartMenuCleanup" Guid="f1b4c826-b8ab-4d3c-9f68-1e5c9c4a2c3f">
+            <Component Id="StartMenuShortcut" Guid="f1b4c826-b8ab-4d3c-9f68-1e5c9c4a2c3f">
+                <Shortcut Id="MauroSpessoriStartMenu"
+                    Name="MauroSpessori"
+                    Target="[INSTALLFOLDER]main.exe"
+                    WorkingDirectory="INSTALLFOLDER"
+                    Icon="MauroIcon.ico"
+                    IconIndex="0" />
                 <RemoveFolder Id="RemoveStartMenuFolder" On="uninstall"/>
-                <RegistryValue Root="HKCU" Key="Software\MauroSpessori" Name="startmenufolder" Type="integer" Value="1" KeyPath="yes"/>
+                <RegistryValue Root="HKCU" Key="Software\MauroSpessori" Name="startmenu" Type="integer" Value="1" KeyPath="yes"/>
             </Component>
         </DirectoryRef>
     </Fragment>
