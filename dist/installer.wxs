@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
-    <Product Id="*" Name="MauroSpessori" Language="1033" Version="1.0.0.0" Manufacturer="Diego Oniarti" UpgradeCode="e6a31747-d0c2-4f78-9cc5-6fe67b80eff4">
+    <Product Id="*" Name="MauroSpessori" Language="1033" Version="1.0.1.0" Manufacturer="Diego Oniarti" UpgradeCode="e6a31747-d0c2-4f78-9cc5-6fe67b80eff4">
         <Package InstallerVersion="500" Compressed="yes" InstallScope="perMachine" />
 
         <MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
